@@ -2,6 +2,7 @@ package reader
 
 import (
 	"bufio"
+	"log"
 	"os"
 )
 
@@ -19,7 +20,12 @@ func NewReader(file string) Reader {
 
 func (r *readerImpl) ReadFile(lines chan string) {
 	defer close(lines)
-
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+			os.Exit(1)
+		}
+	}()
 	f, err := os.Open(r.file)
 	if err != nil {
 		panic(err)

@@ -39,8 +39,6 @@ func NewElasticClient(esHost, esIndex, esType, separator string, interval int) E
 
 	if err != nil {
 		log.Printf("[Error] connecting to elastic - %v\n", err)
-	} else {
-		log.Println("Connected to elasticsearch OK.")
 	}
 
 	return &esClient{
@@ -92,12 +90,12 @@ func (e *esClient) ParserToJson(lines chan string, parser chan models.StandardLo
 func (e *esClient) sendToEs(bulk *elastic.BulkService) {
 	defer func() {
         if err := recover(); err != nil {
-            fmt.Println("connection refused to elasticsearch")
+            log.Println("connection refused to elasticsearch")
         }
     }()
 	response, err := bulk.Do(context.Background())
 	if err != nil || response.Errors {
-		fmt.Println("Error sending bulk to elasticsearch -> " + err.Error())
+		log.Println("Error sending bulk to elasticsearch -> " + err.Error())
 	}
 	log.Println("Sending to elasticsearch errors: ", response.Errors)
 }

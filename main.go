@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	// TODO daemon true / false
 	// Load configs from blogger.yaml (same dir)
 	config := configs.NewConfig().Load()
 	interval, _ := strconv.Atoi(config.Elasticsearch.Interval)
