@@ -1,4 +1,0 @@
-2021/10/02 13:38:22 -.-.- [info] -.-.- Pepe
-2021/10/02 13:38:22 -.-.- [error] -.-.- this is and error code 123
-2021/10/02 13:38:22 -.-.- [debug] -.-.- this message is for debug issue
-2021/10/02 13:38:22 invalid line
