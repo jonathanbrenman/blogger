@@ -1,6 +1,10 @@
 # Blogger
 Collect, parse to json, create bulk and send to elastic search
 
+## Requeriments
+* GO 1.17 (required to build)
+* blogger.yaml (required to run)
+
 ## Settings
 * Create blogger.yaml on same location that the binary file <br>
 
