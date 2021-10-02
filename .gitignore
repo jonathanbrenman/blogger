@@ -4,3 +4,4 @@ tmp
 .DS_Store
 blogger.yaml
 log.txt
+go.sum
