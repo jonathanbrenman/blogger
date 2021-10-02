@@ -1,0 +1,11 @@
+logs:
+  separator: "-.-.-"
+  files:
+    - "./log.txt"
+    - "./logs2.txt"
+
+elasticsearch:
+  es_host: "http://localhost:9200"
+  es_index: "app"
+  es_type: "logs"
+  interval: "5" # (in seconds)

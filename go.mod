@@ -3,8 +3,10 @@ module BLogger
 go 1.14
 
 require (
+	github.com/fortytw2/leaktest v1.3.0 // indirect
+	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/olivere/elastic v6.2.37+incompatible
 	github.com/pkg/errors v0.9.1 // indirect
-	gopkg.in/olivere/elastic.v6 v6.2.37 // indirect
+	gopkg.in/yaml.v2 v2.4.0
 )
