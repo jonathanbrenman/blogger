@@ -96,6 +96,7 @@ func (e *esClient) sendToEs(bulk *elastic.BulkService) {
 	response, err := bulk.Do(context.Background())
 	if err != nil || response.Errors {
 		log.Println("Error sending bulk to elasticsearch -> " + err.Error())
+		return
 	}
 	log.Println("Sending to elasticsearch errors: ", response.Errors)
 }

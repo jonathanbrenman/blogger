@@ -1,9 +1,11 @@
 package reader
 
 import (
-	"bufio"
+	"fmt"
+	"io"
 	"log"
 	"os"
+	"time"
 )
 
 type Reader interface {
@@ -32,10 +34,19 @@ func (r *readerImpl) ReadFile(lines chan string) {
 	}
 	defer f.Close()
 
-	scanner := bufio.NewScanner(f)
-	scanner.Split(bufio.ScanLines)
-
-	for scanner.Scan() {
-		lines <- scanner.Text()
+	offset, err := f.Seek(0, io.SeekEnd)
+	buffer := make([]byte, 1024, 1024)
+	for {
+		readBytes, err := f.ReadAt(buffer, offset)
+		if err != nil  && err != io.EOF{
+			log.Println(err)
+			break
+		}
+		offset += int64(readBytes)
+		if readBytes != 0 {
+			fmt.Println(string(buffer[:readBytes]))
+			lines <- string(buffer[:readBytes])
+		}
+		time.Sleep(time.Second)
 	}
 }
