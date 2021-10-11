@@ -4,6 +4,7 @@ import (
 	"BLogger/clients"
 	"BLogger/configs"
 	"BLogger/models"
+	"BLogger/parser"
 	"BLogger/reader"
 	"strconv"
 	"sync"
@@ -18,7 +19,6 @@ func main() {
 		config.Elasticsearch.EsHost,
 		config.Elasticsearch.EsIndex,
 		config.Elasticsearch.EsType,
-		config.Logs.Separator,
 		interval,
 	)
 
@@ -27,18 +27,18 @@ func main() {
 		wg.Add(1)
 		go func(wg *sync.WaitGroup) {
 			// Initialize channels
-			lines := make(chan string)
-			parser := make(chan models.StandardLog)
+			chLines := make(chan string)
+			chParser := make(chan models.StandardLog)
 
 			// Read logs
-			fReader := reader.NewReader(file)
+			fReader := reader.NewReader(file.File)
 
 			// Thread process
-			go fReader.ReadFile(lines)
-			go esClient.ParserToJson(lines, parser)
-			esClient.CreateBulk(parser)
+			go fReader.ReadFile(chLines)
+			go parser.New(file.Parser, file.Separator).ToJson(chLines, chParser)
+			esClient.CreateBulk(chParser)
 			wg.Done()
 		}(&wg)
-		wg.Wait()
 	}
+	wg.Wait()
 }

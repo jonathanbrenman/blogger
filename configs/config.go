@@ -2,9 +2,9 @@ package configs
 
 import (
 	"errors"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
-	"gopkg.in/yaml.v2"
 )
 
 type Config interface {
@@ -13,8 +13,11 @@ type Config interface {
 
 type configs struct {
 	Logs struct {
-		Separator string   `yaml:"separator"`
-		Files     []string `yaml:"files"`
+		Files     []struct {
+			File string `yaml:"file"`
+			Parser string `yaml:"parser"`
+			Separator string `yaml:"separator"`
+		} `yaml:"files"`
 	} `yaml:"logs"`
 	Elasticsearch struct {
 		EsHost   string `yaml:"es_host"`
@@ -42,8 +45,7 @@ func (c *configs) Load() *configs {
 
 func (c *configs) validate() error {
 	if c.Elasticsearch.EsHost == "" || c.Elasticsearch.Interval == "" ||
-		c.Elasticsearch.EsIndex == "" || c.Elasticsearch.EsType == "" ||
-		c.Logs.Separator == "" || len(c.Logs.Files) == 0 {
+		c.Elasticsearch.EsIndex == "" || c.Elasticsearch.EsType == "" || len(c.Logs.Files) == 0 {
 		return errors.New("missing config fields, please checkout the documentation.")
 	}
 	return nil

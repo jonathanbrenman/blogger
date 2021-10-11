@@ -11,9 +11,12 @@ Collect, parse to json, create bulk and send to elastic search
 Example:
 ```yaml
 logs:
-  separator: "-.-.-" # indicates how you separate the log lines
   files:
-    - "./log.txt"
+#    - file: "./log.txt"
+#      parser: "std"
+#      separator: "-.-.-"
+    - file: "/var/log/syslog"
+      parser: "syslog"
 
 elasticsearch:
   es_host: "http://localhost:9200"
