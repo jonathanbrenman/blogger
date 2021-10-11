@@ -5,12 +5,11 @@ import (
 	"context"
 	"github.com/olivere/elastic"
 	"log"
-	"sync"
-	"time"
 )
 
 type EsClient interface {
-	CreateBulk(parser chan models.StandardLog)
+	CreateBulk(chParser chan models.StandardLog, chBulk chan *elastic.BulkService)
+	Save(bulk *elastic.BulkService)
 }
 
 type esClient struct {
@@ -18,12 +17,11 @@ type esClient struct {
 	esHost string
 	esIndex string
 	esType string
-	interval int
 }
 
 var singletonEsClient EsClient
 
-func NewElasticClient(esHost, esIndex, esType string, interval int) EsClient {
+func NewElasticClient(esHost, esIndex, esType string) EsClient {
 	if singletonEsClient != nil {
 		return singletonEsClient
 	}
@@ -42,36 +40,27 @@ func NewElasticClient(esHost, esIndex, esType string, interval int) EsClient {
 		esHost,
 		esIndex,
 		esType,
-		interval,
 	}
 }
 
-func (e *esClient) CreateBulk(chParser chan models.StandardLog) {
+func (e *esClient) CreateBulk(chParser chan models.StandardLog, chBulk chan *elastic.BulkService) {
 	bulkRequest := e.client.Bulk()
-	mu := sync.Mutex{}
 	for item := range chParser {
 		req := elastic.NewBulkIndexRequest().Index(e.esIndex).Type(e.esType).Doc(item)
 		bulkRequest = bulkRequest.Add(req)
-		time.AfterFunc(time.Duration(e.interval) * time.Second, func() {
-			if bulkRequest != nil {
-				mu.Lock()
-				e.save(bulkRequest)
-				bulkRequest = nil
-				mu.Unlock()
-			}
-		})
+		chBulk <- bulkRequest
 	}
-	mu.Lock()
-	defer mu.Unlock()
-	e.save(bulkRequest)
 }
 
-func (e *esClient) save(bulk *elastic.BulkService) {
+func (e *esClient) Save(bulk *elastic.BulkService) {
 	defer func() {
         if err := recover(); err != nil {
             log.Println("connection refused to elasticsearch")
         }
     }()
+	if bulk == nil {
+		return
+	}
 	response, err := bulk.Do(context.Background())
 	if err != nil || response.Errors {
 		log.Println("Error sending bulk to elasticsearch -> " + err.Error())

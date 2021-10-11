@@ -10,10 +10,10 @@ type Parser interface {
 }
 
 func New(pType, separator string) Parser {
-	// Here we add new parsers strategies.
+	// Parsers strategies.
 	pMap := make(map[string]Parser)
 	pMap["std"] = newStdParser(separator)
-	pMap["syslog"] = newStdParser(separator)
+	pMap["syslog"] = newSyslogParser()
 
 	if _, ok := pMap[pType]; !ok {
 		 log.Fatal("invalid parser type: " + pType)

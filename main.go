@@ -6,8 +6,11 @@ import (
 	"BLogger/models"
 	"BLogger/parser"
 	"BLogger/reader"
+	"fmt"
+	"github.com/olivere/elastic"
 	"strconv"
 	"sync"
+	"time"
 )
 
 func main() {
@@ -19,7 +22,6 @@ func main() {
 		config.Elasticsearch.EsHost,
 		config.Elasticsearch.EsIndex,
 		config.Elasticsearch.EsType,
-		interval,
 	)
 
 	wg := sync.WaitGroup{}
@@ -29,6 +31,7 @@ func main() {
 			// Initialize channels
 			chLines := make(chan string)
 			chParser := make(chan models.StandardLog)
+			chBulk := make(chan *elastic.BulkService)
 
 			// Read logs
 			fReader := reader.NewReader(file.File)
@@ -36,7 +39,13 @@ func main() {
 			// Thread process
 			go fReader.ReadFile(chLines)
 			go parser.New(file.Parser, file.Separator).ToJson(chLines, chParser)
-			esClient.CreateBulk(chParser)
+			go func(ch chan *elastic.BulkService) {
+				for now := range time.Tick(time.Duration(interval) * time.Second) {
+					fmt.Println("Saving bulk in elastic search", now)
+					esClient.Save(<-ch)
+				}
+			}(chBulk)
+			esClient.CreateBulk(chParser, chBulk)
 			wg.Done()
 		}(&wg)
 	}
